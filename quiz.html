@@ -1,0 +1,949 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Road Safety Quiz - Professional Edition</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Font Awesome -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Supabase JS v2 -->
+  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+  <style>
+    * { font-family: 'Inter', sans-serif; }
+    
+    body {
+      background: linear-gradient(to right, #2563EB, #9333EA);
+    }
+
+    .blue-purple-bg-alt {
+      background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+      background-size: 400% 400%;
+      animation: gradientShiftAlt 10s ease infinite;
+    }
+
+    @keyframes gradientShiftAlt {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    .blue-purple-bg-success {
+      background: linear-gradient(to right, #2563EB, #9333EA);
+    }
+
+    .blue-purple-bg-warning {
+      background: linear-gradient(to right, #9333EA, #2563EB);
+    }
+    
+    .glass-effect {
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    
+    .option-btn {
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .option-btn::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+      transition: left 0.5s;
+    }
+    
+    .option-btn:hover::before {
+      left: 100%;
+    }
+    
+    .option-btn:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    }
+    
+    .floating {
+      animation: floating 3s ease-in-out infinite;
+    }
+    
+    @keyframes floating {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-10px); }
+    }
+    
+    .progress-bar {
+      background: linear-gradient(to right, #2563EB, #9333EA);
+      transition: width 0.5s ease-in-out;
+    }
+    
+    .card-hover {
+      transition: all 0.3s ease;
+    }
+    
+    .card-hover:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+    }
+
+    .ai-insight {
+      background: linear-gradient(to right, #2563EB, #9333EA);
+      color: white;
+      border-radius: 15px;
+      padding: 20px;
+      margin: 20px 0;
+    }
+
+    .metric-card {
+      background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+      color: white;
+      border-radius: 15px;
+      padding: 20px;
+      text-align: center;
+    }
+
+    .pass-badge {
+      background: linear-gradient(to right, #2563EB, #9333EA);
+      color: white;
+      padding: 20px 40px;
+      border-radius: 50px;
+      font-size: 2rem;
+      font-weight: bold;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      box-shadow: 0 10px 30px rgba(37, 99, 235, 0.3);
+      animation: pulseGlow 2s ease-in-out infinite;
+    }
+
+    .fail-badge {
+      background: linear-gradient(to right, #9333EA, #2563EB);
+      color: white;
+      padding: 20px 40px;
+      border-radius: 50px;
+      font-size: 2rem;
+      font-weight: bold;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      box-shadow: 0 10px 30px rgba(147, 51, 234, 0.3);
+      animation: pulseGlow 2s ease-in-out infinite;
+    }
+
+    @keyframes pulseGlow {
+      0%, 100% {
+        box-shadow: 0 10px 30px rgba(37, 99, 235, 0.3);
+        transform: scale(1);
+      }
+      50% {
+        box-shadow: 0 15px 40px rgba(37, 99, 235, 0.5);
+        transform: scale(1.05);
+      }
+    }
+
+    .input-field {
+      background: rgba(255, 255, 255, 0.9);
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      border-radius: 12px;
+      padding: 12px 16px;
+      font-size: 16px;
+      transition: all 0.3s ease;
+      backdrop-filter: blur(10px);
+    }
+
+    .input-field:focus {
+      outline: none;
+      border-color: #2563EB;
+      background: rgba(255, 255, 255, 1);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(37, 99, 235, 0.2);
+    }
+
+    .error-message {
+      background: linear-gradient(135deg, #ff6b6b 0%, #ee5a52 100%);
+      color: white;
+      padding: 10px 15px;
+      border-radius: 8px;
+      margin-top: 8px;
+      font-size: 14px;
+    }
+
+    .fade-in {
+      animation: fadeIn 0.5s ease-out forwards;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* Responsive design improvements */
+    @media (max-width: 768px) {
+      .floating {
+        animation-duration: 4s;
+      }
+    }
+
+    /* High contrast mode support */
+    @media (prefers-contrast: high) {
+      .glass-effect {
+        background-color: rgba(255, 255, 255, 0.98);
+      }
+    }
+
+    /* Reduced motion support */
+    @media (prefers-reduced-motion: reduce) {
+      .floating,
+      .pulseGlow,
+      .gradientShiftAlt {
+        animation: none;
+      }
+    }
+  </style>
+</head>
+<body class="min-h-screen">
+  <div id="app" class="max-w-6xl mx-auto p-4 md:p-8">
+    <!-- Welcome Screen -->
+    <div id="welcome-screen" class="space-y-8 fade-in">
+      <!-- Hero Section -->
+      <div class="text-center space-y-6">
+        <div class="inline-block">
+          <div class="relative">
+            <div class="w-20 h-20 bg-white/20 rounded-2xl mx-auto flex items-center justify-center floating backdrop-blur-sm border border-white/30">
+              <i class="fas fa-car text-4xl text-white"></i>
+            </div>
+          </div>
+        </div>
+        <div class="space-y-4">
+          <h1 class="text-4xl md:text-6xl font-bold text-white leading-tight">
+            Road Safety Quiz
+          </h1>
+          <p class="text-xl text-white/90 max-w-2xl mx-auto">
+            Test your knowledge of road safety rules and traffic signs to become a safer driver.
+          </p>
+        </div>
+      </div>
+      <!-- User Registration -->
+      <div class="glass-effect rounded-3xl p-8 shadow-2xl">
+        <div class="max-w-2xl mx-auto space-y-6">
+          <div class="text-center">
+            <h2 class="text-2xl font-bold text-gray-800 mb-2">Registration Required</h2>
+            <p class="text-gray-600">Please provide your details to start the quiz</p>
+          </div>
+          <div class="space-y-4">
+            <div>
+              <label for="user-name" class="block text-sm font-semibold text-gray-700 mb-2">
+                <i class="fas fa-user mr-2"></i>Full Name
+              </label>
+              <input type="text" id="user-name" class="input-field w-full" placeholder="Enter your full name" required>
+              <div id="name-error" class="error-message hidden">Please enter your full name</div>
+            </div>
+            <div>
+              <label for="user-dob" class="block text-sm font-semibold text-gray-700 mb-2">
+                <i class="fas fa-calendar mr-2"></i>Date of Birth
+              </label>
+              <input type="date" id="user-dob" class="input-field w-full" required>
+              <div id="dob-error" class="error-message hidden">You must be at least 18 years old to take this quiz</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- Quiz Configuration -->
+      <div class="glass-effect rounded-3xl p-8 shadow-2xl">
+        <div class="max-w-4xl mx-auto space-y-6">
+          <div class="text-center pt-6">
+            <button id="start-btn" class="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold py-4 px-12 rounded-full transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl">
+              <i class="fas fa-play mr-2"></i>
+              Start Quiz
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- Quiz Container -->
+    <div id="quiz-container" class="hidden space-y-6 fade-in">
+      <!-- Progress Header -->
+      <div class="glass-effect rounded-2xl shadow-xl p-6">
+        <div class="flex flex-wrap gap-4 justify-between items-center mb-4">
+          <div class="flex items-center space-x-4">
+            <div class="flex items-center space-x-2">
+              <i class="fas fa-list-ol text-blue-600"></i>
+              <span class="font-medium text-gray-800">Question <span id="current-question" class="font-bold text-blue-600">1</span> / <span id="total-questions" class="font-bold">0</span></span>
+            </div>
+            <div class="flex items-center space-x-2">
+              <i class="fas fa-trophy text-green-600"></i>
+              <span class="font-medium text-gray-800">Score: <span id="live-score" class="font-bold text-green-600">0</span></span>
+            </div>
+          </div>
+          <div class="flex items-center space-x-4">
+            <div class="text-sm text-gray-600">
+              <i class="fas fa-user mr-1"></i>
+              <span id="quiz-user-name">User</span>
+            </div>
+            <div class="flex items-center space-x-2">
+              <i class="fas fa-clock text-red-500"></i>
+              <span class="font-medium text-gray-800"><span id="time-left" class="font-bold text-red-500">30</span>s</span>
+            </div>
+          </div>
+        </div>
+        <!-- Progress Bar -->
+        <div class="bg-gray-200 rounded-full h-3">
+          <div id="progress-bar" class="progress-bar h-3 rounded-full" style="width: 0%"></div>
+        </div>
+      </div>
+      <!-- Question Image -->
+      <div id="media-wrap" class="hidden">
+        <div class="glass-effect rounded-2xl p-4 shadow-lg">
+          <img id="question-image" class="w-full max-h-80 object-contain rounded-xl" alt="Question image"/>
+        </div>
+      </div>
+      <!-- Question Text -->
+      <div class="glass-effect rounded-2xl shadow-xl p-6">
+        <div class="flex items-start space-x-3">
+          <div class="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0 mt-1">
+            <i class="fas fa-question text-blue-600"></i>
+          </div>
+          <div id="question-text" class="text-lg font-medium text-gray-800 leading-relaxed" role="region" aria-live="polite"></div>
+        </div>
+      </div>
+      <!-- Options -->
+      <div id="options-container" class="grid gap-4"></div>
+    </div>
+    <!-- Results Screen -->
+    <div id="results-screen" class="hidden fade-in">
+      <div class="glass-effect rounded-3xl shadow-2xl p-8">
+        <!-- Results Header -->
+        <div class="text-center space-y-4 mb-8">
+          <div id="result-icon" class="w-20 h-20 bg-gradient-to-r from-blue-400 to-purple-600 rounded-full mx-auto flex items-center justify-center">
+            <i class="fas fa-check text-white text-3xl"></i>
+          </div>
+          <h2 class="text-3xl font-bold text-gray-800">Quiz Complete!</h2>
+          <p class="text-gray-600">Here's your performance summary</p>
+          <div class="text-lg font-medium text-gray-700">
+            <i class="fas fa-user mr-2"></i>
+            <span id="results-user-name">User</span>
+          </div>
+        </div>
+        <!-- Pass/Fail Badge -->
+        <div class="text-center mb-8">
+          <div id="pass-fail-badge" class="inline-block pass-badge">
+            <i class="fas fa-trophy mr-3"></i>
+            <span id="pass-fail-text">PASS</span>
+          </div>
+          <p id="pass-fail-message" class="text-lg text-gray-600 mt-4">
+            Congratulations! You have successfully passed the Road Safety Quiz.
+          </p>
+        </div>
+        <!-- Score Display -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+          <div class="metric-card">
+            <div class="text-3xl font-bold mb-2">
+              <span id="score">0</span> / <span id="total-score">0</span>
+            </div>
+            <p class="opacity-90">Questions Correct</p>
+          </div>
+          <div class="metric-card">
+            <div class="text-3xl font-bold mb-2" id="percentage">0%</div>
+            <p class="opacity-90">Accuracy Rate</p>
+          </div>
+          <div class="metric-card">
+            <div class="text-3xl font-bold mb-2" id="completion-time">0:00</div>
+            <p class="opacity-90">Time Taken</p>
+          </div>
+        </div>
+        <!-- Performance Analysis Section -->
+        <div class="ai-insight mb-8">
+          <div class="flex items-center space-x-3 mb-6">
+            <div class="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
+              <i class="fas fa-chart-line text-white text-xl"></i>
+            </div>
+            <div>
+              <h3 class="text-xl font-bold text-white">Performance Analysis</h3>
+              <p class="text-white/80">Your quiz results breakdown</p>
+            </div>
+          </div>
+          <!-- Performance Metrics -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+            <div class="bg-white/10 rounded-xl p-4">
+              <h4 class="font-semibold text-white mb-3 flex items-center">
+                <i class="fas fa-target mr-2"></i>
+                Score Analysis
+              </h4>
+              <div class="space-y-2 text-sm text-white/90">
+                <div class="flex justify-between">
+                  <span>Correct Answers:</span>
+                  <span id="analysis-correct" class="font-bold">0</span>
+                </div>
+                <div class="flex justify-between">
+                  <span>Incorrect Answers:</span>
+                  <span id="analysis-incorrect" class="font-bold">0</span>
+                </div>
+                <div class="flex justify-between">
+                  <span>Success Rate:</span>
+                  <span id="analysis-rate" class="font-bold">0%</span>
+                </div>
+              </div>
+            </div>
+            <div class="bg-white/10 rounded-xl p-4">
+              <h4 class="font-semibold text-white mb-3 flex items-center">
+                <i class="fas fa-clock mr-2"></i>
+                Time Analysis
+              </h4>
+              <div class="space-y-2 text-sm text-white/90">
+                <div class="flex justify-between">
+                  <span>Total Time:</span>
+                  <span id="analysis-total-time" class="font-bold">0:00</span>
+                </div>
+                <div class="flex justify-between">
+                  <span>Avg. per Question:</span>
+                  <span id="analysis-avg-time" class="font-bold">0s</span>
+                </div>
+                <div class="flex justify-between">
+                  <span>Time Efficiency:</span>
+                  <span id="analysis-efficiency" class="font-bold">Good</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- Category Performance -->
+          <div class="bg-white/10 rounded-xl p-4 mb-4">
+            <h4 class="font-semibold text-white mb-3 flex items-center">
+              <i class="fas fa-list mr-2"></i>
+              Category Performance
+            </h4>
+            <div id="category-breakdown" class="text-white/90">
+              <!-- Category breakdown will be populated by JavaScript -->
+            </div>
+          </div>
+          <!-- Recommendation -->
+          <div class="bg-white/10 rounded-xl p-4">
+            <h4 class="font-semibold text-white mb-3 flex items-center">
+              <i class="fas fa-lightbulb mr-2"></i>
+              Recommendation
+            </h4>
+            <p id="recommendation-text" class="text-white/90 leading-relaxed">
+              Based on your performance, continue practicing road safety rules and traffic signs to improve your knowledge.
+            </p>
+          </div>
+        </div>
+        <!-- Action Buttons -->
+        <div class="flex flex-wrap gap-4 justify-center">
+          <button onclick="location.reload()" class="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white px-8 py-3 rounded-xl font-semibold transition-all duration-300 transform hover:scale-105">
+            <i class="fas fa-home mr-2"></i>
+            Return to Home
+          </button>
+          <button id="retake-btn" class="bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white px-8 py-3 rounded-xl font-semibold transition-all duration-300 transform hover:scale-105">
+            <i class="fas fa-redo mr-2"></i>
+            Retake Quiz
+          </button>
+          <button id="share-btn" class="bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-700 hover:to-indigo-800 text-white px-8 py-3 rounded-xl font-semibold transition-all duration-300 transform hover:scale-105">
+            <i class="fas fa-share mr-2"></i>
+            Share Results
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<script>
+/* ====== SUPABASE CONFIG ====== */
+const SUPABASE_URL = "https://ittpqmsjywssnffqoonv.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml0dHBxbXNqeXdzc25mZnFvb252Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTAwNzY3NjksImV4cCI6MjA2NTY1Mjc2OX0.UdnbCkWY2j3JcPSZhEuLJz0-eXX1HQ_daZmTI62zRFU";
+const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+/* ====== STATE ====== */
+let questions = [];
+let currentQuestionIndex = 0;
+let score = 0;
+let timer = null;
+let quizStartTime = null;
+let userPerformanceData = [];
+let userName = '';
+let userDob = '';
+
+/* ====== ELEMENTS ====== */
+const welcomeScreen = document.getElementById("welcome-screen");
+const quizContainer = document.getElementById("quiz-container");
+const resultsScreen = document.getElementById("results-screen");
+
+const qTextEl = document.getElementById("question-text");
+const optsEl = document.getElementById("options-container");
+const imgWrap = document.getElementById("media-wrap");
+const imgEl = document.getElementById("question-image");
+
+const currentQEl = document.getElementById("current-question");
+const totalQEl = document.getElementById("total-questions");
+const timeLeftEl = document.getElementById("time-left");
+const liveScoreEl = document.getElementById("live-score");
+const progressBarEl = document.getElementById("progress-bar");
+
+const finalScoreEl = document.getElementById("score");
+const totalScoreEl = document.getElementById("total-score");
+const percentageEl = document.getElementById("percentage");
+
+/* ====== USER VALIDATION ====== */
+function validateAge(dateOfBirth) {
+  const today = new Date();
+  const birthDate = new Date(dateOfBirth);
+  const age = today.getFullYear() - birthDate.getFullYear();
+  const monthDiff = today.getMonth() - birthDate.getMonth();
+  
+  if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+    return age - 1 >= 18;
+  }
+  
+  return age >= 18;
+}
+
+function validateUserInput() {
+  const nameInput = document.getElementById('user-name');
+  const dobInput = document.getElementById('user-dob');
+  const nameError = document.getElementById('name-error');
+  const dobError = document.getElementById('dob-error');
+  
+  let isValid = true;
+  
+  // Validate name
+  if (!nameInput.value.trim()) {
+    nameError.classList.remove('hidden');
+    nameInput.focus();
+    isValid = false;
+  } else {
+    nameError.classList.add('hidden');
+    userName = nameInput.value.trim();
+  }
+  
+  // Validate date of birth
+  if (!dobInput.value) {
+    dobError.textContent = 'Please enter your date of birth';
+    dobError.classList.remove('hidden');
+    if (isValid) dobInput.focus();
+    isValid = false;
+  } else if (!validateAge(dobInput.value)) {
+    dobError.textContent = 'You must be at least 18 years old to take this quiz';
+    dobError.classList.remove('hidden');
+    if (isValid) dobInput.focus();
+    isValid = false;
+  } else {
+    dobError.classList.add('hidden');
+    userDob = dobInput.value;
+  }
+  
+  return isValid;
+}
+
+/* ====== HELPERS ====== */
+function safeJsonParse(val) {
+  if (Array.isArray(val)) return val;
+  if (val == null) return [];
+  if (typeof val === "object") return Object.values(val);
+  try {
+    const parsed = JSON.parse(val);
+    return Array.isArray(parsed) ? parsed : Object.values(parsed);
+  } catch {
+    return String(val).split(/\s*\|\s*|\s*,\s*/).filter(Boolean);
+  }
+}
+
+function shuffle(array) {
+  return array.map(a => [Math.random(), a]).sort((a,b)=>a[0]-b[0]).map(a=>a[1]);
+}
+
+function normalize(text) {
+  return String(text || "")
+    .replace(/^[A-D]\s*[\.\)]\s*/i, "")
+    .trim()
+    .toLowerCase();
+}
+
+function getCorrectText(row, opts) {
+  if (row.answers && String(row.answers).trim()) return row.answers;
+  const ca = row.correct_answer;
+  if (!isNaN(ca)) {
+    const n = Number(ca);
+    if (n > 0 && n <= opts.length) return opts[n - 1];
+    if (n >= 0 && n < opts.length) return opts[n];
+  }
+  return String(ca);
+}
+
+function buildImageUrl(u) {
+  if (!u) return "";
+  let s = String(u).trim();
+  if (/^https?:\/\//i.test(s)) return s;
+  return `${SUPABASE_URL}/storage/v1/object/public/signs/${s.replace(/^\//, "")}`;
+}
+
+function showImageIfAvailable(rawUrl) {
+  const finalUrl = buildImageUrl(rawUrl);
+  if (!finalUrl) {
+    imgWrap.classList.add("hidden");
+    imgEl.src = "";
+    return;
+  }
+  const probe = new Image();
+  probe.onload = () => {
+    imgEl.src = finalUrl;
+    imgWrap.classList.remove("hidden");
+  };
+  probe.onerror = () => {
+    imgWrap.classList.add("hidden");
+    imgEl.src = "";
+  };
+  probe.src = finalUrl;
+}
+
+function updateProgress() {
+  const progress = ((currentQuestionIndex + 1) / questions.length) * 100;
+  progressBarEl.style.width = `${progress}%`;
+}
+
+function formatTime(seconds) {
+  const mins = Math.floor(seconds / 60);
+  const secs = seconds % 60;
+  return `${mins}:${secs.toString().padStart(2, '0')}`;
+}
+
+function analyzePerformance(score, total, timeData) {
+  const percentage = (score / total) * 100;
+  const totalTime = timeData.reduce((sum, item) => sum + item.timeSpent, 0);
+  const avgTimePerQuestion = totalTime / total;
+  
+  let recommendation = '';
+  if (percentage >= 90) {
+    recommendation = 'Outstanding performance! You demonstrate excellent knowledge of road safety principles.';
+  } else if (percentage >= 80) {
+    recommendation = 'Great work! You have a strong foundation in road safety. Keep practicing to maintain this level.';
+  } else if (percentage >= 70) {
+    recommendation = 'Good progress! Continue studying road safety rules and traffic signs to improve further.';
+  } else if (percentage >= 60) {
+    recommendation = 'You\'re on the right track. Focus on understanding traffic rules and practice more regularly.';
+  } else {
+    recommendation = 'Additional study is recommended. Consider reviewing road safety materials and taking practice tests.';
+  }
+
+  return {
+    percentage: percentage,
+    avgTime: avgTimePerQuestion,
+    recommendation: recommendation,
+    timeEfficiency: avgTimePerQuestion <= 20 ? 'Excellent' : avgTimePerQuestion <= 25 ? 'Good' : 'Average'
+  };
+}
+
+/* ====== INITIALIZATION ====== */
+document.addEventListener('DOMContentLoaded', function() {
+  // Input field animations
+  document.querySelectorAll('.input-field').forEach(input => {
+    input.addEventListener('focus', function() {
+      this.parentElement.querySelector('.error-message')?.classList.add('hidden');
+    });
+  });
+});
+
+/* ====== START QUIZ ====== */
+document.getElementById("start-btn").addEventListener("click", startQuiz);
+
+async function startQuiz() {
+  // Validate user input first
+  if (!validateUserInput()) {
+    return;
+  }
+
+  welcomeScreen.classList.add("hidden");
+  quizContainer.classList.remove("hidden");
+  quizStartTime = Date.now();
+
+  // Display user name in quiz
+  document.getElementById('quiz-user-name').textContent = userName;
+
+  const { data, error } = await supabaseClient.from("quiz_questions").select("*");
+  if (error) {
+    console.error("Supabase error:", error.message);
+    alert("Error loading questions. Check console for details.");
+    return;
+  }
+  if (!data || data.length === 0) {
+    alert("No questions found in database.");
+    return;
+  }
+
+  questions = shuffle(
+    data.map(row => {
+      const opts = safeJsonParse(row.options) || [];
+      return {
+        id: row.id,
+        question: row.question,
+        options: shuffle([...opts]),
+        correctText: getCorrectText(row, opts),
+        image_url: row.image_url || "",
+        category: row.category || "general"
+      };
+    })
+  ).slice(0, 20);
+
+  totalQEl.textContent = questions.length;
+  score = 0;
+  liveScoreEl.textContent = score;
+  currentQuestionIndex = 0;
+  userPerformanceData = [];
+  showQuestion();
+}
+
+/* ====== SHOW QUESTION ====== */
+function showQuestion() {
+  clearInterval(timer);
+  if (currentQuestionIndex >= questions.length) return showResults();
+
+  const q = questions[currentQuestionIndex];
+  currentQEl.textContent = currentQuestionIndex + 1;
+  qTextEl.textContent = q.question;
+  
+  updateProgress();
+
+  if (q.image_url && String(q.image_url).trim() !== "") {
+    showImageIfAvailable(q.image_url);
+  } else {
+    imgWrap.classList.add("hidden");
+    imgEl.src = "";
+  }
+
+  optsEl.innerHTML = "";
+  q.options.forEach((opt, index) => {
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.innerHTML = `
+      <div class="flex items-center space-x-3">
+        <div class="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center font-semibold text-gray-600">
+          ${String.fromCharCode(65 + index)}
+        </div>
+        <span class="text-left flex-1">${opt}</span>
+      </div>
+    `;
+    btn.className = "option-btn bg-white p-4 rounded-xl border-2 border-gray-200 hover:border-blue-300 hover:bg-blue-50 text-left transition-all duration-300 transform hover:scale-[1.02]";
+    btn.addEventListener("click", () => handleAnswer(btn, opt, q.correctText));
+    optsEl.appendChild(btn);
+  });
+
+  startTimer();
+}
+
+/* ====== TIMER ====== */
+function startTimer() {
+  let t = 30;
+  timeLeftEl.textContent = t;
+  const startTime = Date.now();
+  
+  clearInterval(timer);
+  timer = setInterval(() => {
+    t--;
+    timeLeftEl.textContent = t;
+    
+    if (t <= 10) {
+      timeLeftEl.parentElement.className = "flex items-center space-x-2 text-red-500 animate-pulse";
+    }
+    
+    if (t <= 0) {
+      clearInterval(timer);
+      userPerformanceData.push({
+        questionIndex: currentQuestionIndex,
+        timeSpent: 30,
+        correct: false,
+        category: questions[currentQuestionIndex].category
+      });
+      goNext();
+    }
+  }, 1000);
+}
+
+/* ====== HANDLE ANSWER ====== */
+function handleAnswer(button, selectedText, correctTextRaw) {
+  const endTime = Date.now();
+  const timeSpent = 30 - parseInt(timeLeftEl.textContent);
+  
+  clearInterval(timer);
+  optsEl.querySelectorAll("button").forEach(b => b.disabled = true);
+  
+  const selected = normalize(selectedText);
+  const correct = normalize(correctTextRaw);
+  const isCorrect = selected === correct;
+
+  userPerformanceData.push({
+    questionIndex: currentQuestionIndex,
+    timeSpent: timeSpent,
+    correct: isCorrect,
+    category: questions[currentQuestionIndex].category
+  });
+
+  if (isCorrect) {
+    score++;
+    liveScoreEl.textContent = score;
+    button.classList.remove("border-gray-200", "hover:border-blue-300", "hover:bg-blue-50");
+    button.classList.add("bg-green-100", "border-green-400", "text-green-800");
+    
+    button.innerHTML = `
+      <div class="flex items-center justify-between">
+        ${button.innerHTML}
+        <i class="fas fa-check text-green-600"></i>
+      </div>
+    `;
+  } else {
+    button.classList.remove("border-gray-200", "hover:border-blue-300", "hover:bg-blue-50");
+    button.classList.add("bg-red-100", "border-red-400", "text-red-800");
+    
+    button.innerHTML = `
+      <div class="flex items-center justify-between">
+        ${button.innerHTML}
+        <i class="fas fa-times text-red-600"></i>
+      </div>
+    `;
+    
+    optsEl.querySelectorAll("button").forEach(b => {
+      if (normalize(b.textContent) === correct) {
+        b.classList.remove("border-gray-200");
+        b.classList.add("bg-green-100", "border-green-400", "text-green-800");
+        b.innerHTML = `
+          <div class="flex items-center justify-between">
+            ${b.innerHTML}
+            <i class="fas fa-check text-green-600"></i>
+          </div>
+        `;
+      }
+    });
+  }
+  
+  setTimeout(goNext, 1500);
+}
+
+/* ====== NEXT / RESULTS ====== */
+function goNext() {
+  currentQuestionIndex++;
+  if (currentQuestionIndex < questions.length) {
+    showQuestion();
+  } else {
+    showResults();
+  }
+}
+
+function showResults() {
+  clearInterval(timer);
+  const quizEndTime = Date.now();
+  const totalTimeSeconds = Math.floor((quizEndTime - quizStartTime) / 1000);
+  
+  quizContainer.classList.add("hidden");
+  resultsScreen.classList.remove("hidden");
+  
+  // Display user name in results
+  document.getElementById('results-user-name').textContent = userName;
+  
+  finalScoreEl.textContent = score;
+  totalScoreEl.textContent = questions.length;
+  const percentage = questions.length ? ((score / questions.length) * 100).toFixed(1) : "0.0";
+  percentageEl.textContent = `${percentage}%`;
+  document.getElementById("completion-time").textContent = formatTime(totalTimeSeconds);
+  
+  // Pass/Fail Logic
+  const passed = score >= 15;
+  const passFallBadge = document.getElementById('pass-fail-badge');
+  const passFallText = document.getElementById('pass-fail-text');
+  const passFallMessage = document.getElementById('pass-fail-message');
+  const resultIcon = document.getElementById('result-icon');
+  
+  if (passed) {
+    passFallBadge.className = 'inline-block pass-badge';
+    passFallText.innerHTML = '<i class="fas fa-trophy mr-3"></i>PASS';
+    passFallMessage.textContent = 'Congratulations! You have successfully passed the Road Safety Quiz. You demonstrate good understanding of road safety principles.';
+    resultIcon.innerHTML = '<i class="fas fa-trophy text-white text-3xl"></i>';
+    document.body.className = 'min-h-screen blue-purple-bg-success';
+  } else {
+    passFallBadge.className = 'inline-block fail-badge';
+    passFallText.innerHTML = '<i class="fas fa-times mr-3"></i>FAIL';
+    passFallMessage.textContent = 'Unfortunately, you did not pass this time. You need at least 15 correct answers to pass. Please study more and retake the quiz.';
+    resultIcon.innerHTML = '<i class="fas fa-times text-white text-3xl"></i>';
+    resultIcon.className = 'w-20 h-20 bg-gradient-to-r from-red-400 to-red-600 rounded-full mx-auto flex items-center justify-center';
+    document.body.className = 'min-h-screen blue-purple-bg-warning';
+  }
+  
+  // Performance Analysis
+  const analysis = analyzePerformance(score, questions.length, userPerformanceData);
+  
+  // Update analysis metrics
+  document.getElementById("analysis-correct").textContent = score;
+  document.getElementById("analysis-incorrect").textContent = (questions.length - score);
+  document.getElementById("analysis-rate").textContent = `${percentage}%`;
+  document.getElementById("analysis-total-time").textContent = formatTime(totalTimeSeconds);
+  document.getElementById("analysis-avg-time").textContent = `${analysis.avgTime.toFixed(1)}s`;
+  document.getElementById("analysis-efficiency").textContent = analysis.timeEfficiency;
+  
+  // Category breakdown
+  const categoryStats = {};
+  userPerformanceData.forEach(item => {
+    if (!categoryStats[item.category]) {
+      categoryStats[item.category] = { correct: 0, total: 0 };
+    }
+    categoryStats[item.category].total++;
+    if (item.correct) categoryStats[item.category].correct++;
+  });
+  
+  const categoryBreakdown = document.getElementById("category-breakdown");
+  let categoryHTML = '';
+  Object.keys(categoryStats).forEach(category => {
+    const stats = categoryStats[category];
+    const categoryPercentage = ((stats.correct / stats.total) * 100).toFixed(0);
+    const categoryName = {
+      'rules': 'Traffic Rules',
+      'cs': 'Construction Signs',
+      'ms': 'Mandatory Signs',
+      'is': 'Information Signs',
+      'general': 'General Knowledge'
+    }[category] || category;
+    
+    categoryHTML += `
+      <div class="flex justify-between items-center mb-2">
+        <span>${categoryName}:</span>
+        <span class="font-bold">${stats.correct}/${stats.total} (${categoryPercentage}%)</span>
+      </div>
+    `;
+  });
+  categoryBreakdown.innerHTML = categoryHTML;
+  
+  // Update recommendation
+  document.getElementById("recommendation-text").textContent = analysis.recommendation;
+  
+  // Add event listeners for action buttons
+  document.getElementById("retake-btn").addEventListener("click", () => {
+    resultsScreen.classList.add("hidden");
+    welcomeScreen.classList.remove("hidden");
+    score = 0;
+    currentQuestionIndex = 0;
+  });
+  
+  document.getElementById("share-btn").addEventListener("click", () => {
+    const status = passed ? 'PASSED' : 'FAILED';
+    if (navigator.share) {
+      navigator.share({
+        title: 'Road Safety Quiz Results',
+        text: `${userName} ${status} the Road Safety Quiz with a score of ${score}/${questions.length} (${percentage}%)!`,
+        url: window.location.href
+      });
+    } else {
+      const text = `${userName} ${status} the Road Safety Quiz with a score of ${score}/${questions.length} (${percentage}%)! Check it out: ${window.location.href}`;
+      navigator.clipboard.writeText(text).then(() => {
+        alert('Results copied to clipboard!');
+      });
+    }
+  });
+}
+</script>
+</body>
+</html>

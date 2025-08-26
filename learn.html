@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="en" class="dark:bg-gray-900">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Learn Road Safety Signs</title>
+    <meta name="description" content="Learn about road safety signs and their categories" />
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        darkMode: 'class',
+        theme: {
+          extend: {
+            colors: {
+              'primary-orange': '#f97316',
+              'primary-red': '#ef4444',
+              'mandatory-bg': '#bfdbfe',
+              'cautionary-bg': '#fcd34d',
+              'informational-bg': '#a7f3d0',
+              'dark-bg': '#1f2937',
+              'dark-text': '#e5e7eb',
+            },
+            animation: {
+              'fade-in': 'fadeIn 0.6s ease-in-out',
+              'fade-in-delay-1': 'fadeIn 0.6s ease-in-out 0.2s',
+              'fade-in-delay-2': 'fadeIn 0.6s ease-in-out 0.4s',
+              'fade-in-delay-3': 'fadeIn 0.6s ease-in-out 0.6s',
+              'pulse': 'pulse 2.5s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+            },
+            keyframes: {
+              fadeIn: {
+                '0%': { opacity: '0', transform: 'translateY(20px)' },
+                '100%': { opacity: '1', transform: 'translateY(0)' },
+              },
+              pulse: {
+                '0%, 100%': { opacity: '1' },
+                '50%': { opacity: '0.5' },
+              },
+            },
+          },
+        },
+      };
+    </script>
+    <!-- React and ReactDOM (UMD) -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <!-- Babel for in-browser JSX transform -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <!-- Lucide icons (vanilla) -->
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+    <style>
+      /* Remove focus outlines globally */
+      *:focus {
+        outline: none !important;
+      }
+      /* Smooth background pulse animation tuning */
+      .animate-pulse { animation-duration: 2.5s; }
+      /* Glassmorphism for header */
+      header {
+        backdrop-filter: blur(12px) saturate(1.3);
+        background: rgba(255, 255, 255, 0.8);
+        box-shadow: 0 10px 32px -8px rgba(0, 0, 0, 0.1), 0 1.5px 0 rgba(255, 255, 255, 0.1);
+        position: sticky;
+        top: 0;
+        z-index: 50;
+        transition: box-shadow 0.3s;
+      }
+      /* Navigation buttons */
+      .main-nav-btn {
+        position: relative;
+        overflow: hidden;
+        outline: none;
+        transition: background 0.22s, color 0.22s, box-shadow 0.22s, transform 0.18s;
+        box-shadow: 0 2px 12px -2px #fbbf2444;
+        border: none;
+        font-weight: 600;
+        letter-spacing: 0.02em;
+      }
+      .main-nav-btn:focus-visible {
+        outline: 2.5px solid #fbbf24;
+        outline-offset: 2px;
+        box-shadow: 0 0 0 4px #fbbf2433;
+      }
+      .main-nav-btn:hover, .main-nav-btn:active {
+        background: linear-gradient(90deg, #fff7ed 0%, #fbbf24 100%);
+        color: #f97316 !important;
+        transform: translateY(-2px) scale(1.06);
+        box-shadow: 0 6px 22px -4px #fbbf24a8;
+      }
+      .main-nav-btn.active {
+        background: #f97316 !important;
+        color: #fff !important;
+        box-shadow: 0 4px 16px -4px #f97316a8;
+      }
+      /* Category cards */
+      .category-card {
+        transition: all 0.32s ease-out, transform 0.32s ease-out, border-radius 0.18s ease-out;
+        border: 1.5px solid #fff6;
+        background: rgba(255, 255, 255, 0.7);
+        backdrop-filter: blur(8px) saturate(1.1);
+        box-shadow: 0 8px 36px 0 #fbbf2444, 0 2px 8px #22c55e22;
+        position: relative;
+        border-radius: 1.75rem; /* Increased from default */
+      }
+      .category-card:hover {
+        box-shadow: 0 16px 48px -8px #fbbf24a8, 0 2px 8px #22c55e33;
+        transform: translateY(-7px) scale(1.02);
+        border: 2px solid #fbbf24;
+        background: rgba(255, 255, 255, 0.93);
+        border-radius: 2rem; /* Slightly more rounded on hover */
+      }
+      .category-card:focus,
+      .category-card:focus-within {
+        outline: none !important;
+        box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2), 0 16px 48px -8px #fbbf24a8 !important;
+        transform: translateY(-7px) scale(1.02);
+        border: 2px solid #fbbf24;
+        background: rgba(255, 255, 255, 0.93);
+        border-radius: 2rem;
+      }
+      .category-icon {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.25s ease-out;
+        box-shadow: 0 4px 18px -5px #3b82f6a8, 0 2px 8px #fbbf24a8;
+        border-radius: 1.25rem; /* Added rounded corners to icons */
+      }
+      .category-card:hover .category-icon {
+        transform: scale(1.12) rotate(-2deg);
+        box-shadow: 0 8px 28px -7px #fbbf24a8;
+      }
+      /* Learn More Button */
+      .learn-more-btn {
+        color: #fff;
+        font-weight: 700;
+        padding: 0.9rem 2.2rem;
+        border-radius: 0.8rem;
+        border: none;
+        box-shadow: 0 4px 16px -4px #00000044;
+        font-size: 1.08rem;
+        transition: background 0.22s, color 0.22s, transform 0.22s, box-shadow 0.22s;
+        cursor: pointer;
+        letter-spacing: 0.1px;
+        outline: none;
+      }
+      .learn-more-btn:focus-visible {
+        outline: 2.5px solid #fbbf24;
+        outline-offset: 2px;
+        box-shadow: 0 0 0 4px #fbbf2433;
+      }
+      .learn-more-btn:hover, .learn-more-btn:active {
+        color: #fff;
+        box-shadow: 0 8px 24px -6px #00000066;
+        transform: scale(1.07) translateY(-2px);
+      }
+      /* Info section glass and icons */
+      .additional-info {
+        background: rgba(255, 255, 255, 0.8);
+        backdrop-filter: blur(8px) saturate(1.1);
+        border-radius: 1.5rem;
+        box-shadow: 0 10px 24px -6px #fbbf24a8;
+        border: 1.5px solid #fff6;
+      }
+      .info-icon {
+        background: linear-gradient(135deg, #f59e42 40%, #fde68a 100%);
+        border-radius: 50%;
+        color: #fff;
+        box-shadow: 0 2px 8px #fbbf24a8;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 3.2rem;
+        height: 3.2rem;
+        font-size: 2rem;
+        margin: 0 auto 0.7rem auto;
+        transition: background 0.18s, transform 0.18s;
+      }
+      .info-item:hover .info-icon {
+        background: linear-gradient(135deg, #fbbf24 60%, #f59e42 100%);
+        transform: scale(1.12) rotate(2deg);
+      }
+      /* Floating shapes */
+      .floating-shape {
+        animation-duration: 4s;
+      }
+      /* Body background */
+      body {
+        background: linear-gradient(to bottom right, #e0f2fe, #ffffff, #ccfbf1);
+      }
+      /* Dark mode polish */
+      @media (prefers-color-scheme: dark) {
+        body, .bg-gradient-main {
+          background: linear-gradient(to bottom right, #1e3a8a, #1f2937, #065f46);
+          color: #e5e7eb;
+        }
+        header {
+          background: rgba(31, 41, 55, 0.8);
+          box-shadow: 0 10px 32px -8px rgba(0, 0, 0, 0.3), 0 1.5px 0 rgba(255, 255, 255, 0.1);
+        }
+        .category-card, .additional-info {
+          background: rgba(31, 41, 55, 0.7) !important;
+          color: #e5e7eb;
+          border: 1.5px solid #374151;
+        }
+        .category-card:hover, .category-card:focus-within {
+          background: rgba(31, 41, 55, 0.92) !important;
+        }
+        .learn-more-btn:hover, .learn-more-btn:active {
+          color: #fff;
+        }
+        .info-icon {
+          background: linear-gradient(135deg, #fbbf24 40%, #374151 100%);
+        }
+      }
+      /* Remove all focus outlines and replace with subtle shadow */
+      .category-card:focus,
+      .category-card:focus-visible,
+      .category-card:focus-within {
+        outline: none !important;
+        box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2) !important;
+      }
+      /* Responsive tweaks */
+      @media (max-width: 900px) {
+        .category-card { padding: 1.2rem 0.7rem; }
+        .additional-info { padding: 1.2rem 0.5rem; }
+      }
+    </style>
+  </head>
+  <body class="min-h-screen font-sans text-gray-800 dark:bg-dark-bg dark:text-dark-text">
+    <div id="root"></div>
+
+    <script type="text/babel" data-presets="react">
+      const { useState, useEffect } = React;
+
+      // Map icon names to lucide data names
+      const categories = [
+        {
+          id: 'ms',
+          title: 'Mandatory Signs',
+          description: 'Signs that give orders—what you must or must not do on the road.',
+          icon: 'shield',
+          color: 'from-blue-500 to-cyan-500',
+          gradient: 'bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-blue-900 dark:to-blue-700',
+          examples: ['No Entry', 'Speed Limit', 'Turn Left Only', 'Compulsory Cycle Lane'],
+          href: 'category.html?category=ms'
+        },
+        {
+          id: 'cs',
+          title: 'Cautionary Signs',
+          description: 'Signs that warn you of possible hazards or changes in road conditions.',
+          icon: 'alert-triangle',
+          color: 'from-amber-500 to-orange-500',
+          gradient: 'bg-gradient-to-br from-amber-50 to-orange-50 dark:from-yellow-900 dark:to-yellow-700',
+          examples: ['Sharp Turn', 'School Zone', 'Animals Crossing', 'Road Work Ahead'],
+          href: 'category.html?category=cs'
+        },
+        {
+          id: 'is',
+          title: 'Informational Signs',
+          description: 'Signs that provide helpful information about routes and services.',
+          icon: 'info',
+          color: 'from-emerald-500 to-teal-500',
+          gradient: 'bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-green-900 dark:to-green-700',
+          examples: ['Hospital', 'Fuel Station', 'Rest Area', 'Tourist Information'],
+          href: 'category.html?category=is'
+        },
+        {
+          id: 'rules',
+          title: 'Traffic Rules',
+          description: 'The rules define traffic behavior, safety practices, and sign meanings that drivers must follow.',
+          icon: 'book-open',
+          color: 'from-purple-500 to-indigo-500',
+          gradient: 'bg-gradient-to-br from-purple-50 to-indigo-50 dark:from-blue-900 dark:to-blue-700',
+          examples: ['Safety Precaution', 'Govt Guidelines', 'Traffic Rules', 'Violations & Penalties'],
+          href: 'category.html?category=rules'
+        }
+      ];
+
+      const FloatingShape = ({ delay, size, position }) => (
+        <div 
+          className={`floating-shape absolute ${size} ${position} bg-gradient-to-r from-blue-400/10 to-cyan-400/10 rounded-full blur-sm animate-pulse`}
+          style={{ animationDelay: `${delay}s`, animationDuration: '4s' }}
+        />
+      );
+
+      const StatCard = ({ icon, title, value, color }) => (
+        <div className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm border border-gray-200/50 dark:border-gray-700 rounded-2xl p-6 text-center hover:bg-white/80 dark:hover:bg-gray-800/80 hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
+          <div className={`inline-flex items-center justify-center w-16 h-16 ${color} rounded-2xl mb-4 shadow-lg transform transition-transform duration-300 hover:scale-110`}>
+            <i data-lucide={icon} className="w-8 h-8 text-white"></i>
+          </div>
+          <div className="text-3xl font-bold text-gray-900 dark:text-dark-text mb-2">{value}</div>
+          <div className="text-sm text-gray-600 dark:text-gray-300 font-medium">{title}</div>
+        </div>
+      );
+
+      const CategoryCard = ({ category, index }) => {
+        const [isHovered, setIsHovered] = useState(false);
+
+        useEffect(() => {
+          if (window.lucide && typeof window.lucide.createIcons === 'function') {
+            window.lucide.createIcons();
+          }
+        }, []);
+
+        return (
+          <div 
+            className={`group relative category-card p-8 transition-all duration-500 ease-out hover:shadow-2xl hover:shadow-blue-500/20 hover:-translate-y-2 ${category.gradient} animate-fade-in`}
+            style={{ animationDelay: `${index * 120}ms` }}
+            onMouseEnter={() => setIsHovered(true)}
+            onMouseLeave={() => setIsHovered(false)}
+          >
+            <div className={`absolute inset-0 bg-gradient-to-br ${category.color} opacity-0 group-hover:opacity-5 transition-opacity duration-500 rounded-2xl`} />
+            <div className={`absolute top-0 left-8 right-8 h-1 bg-gradient-to-r ${category.color} rounded-full transform scale-x-0 group-hover:scale-x-100 transition-transform duration-500`} />
+
+            <div className="relative z-10">
+              <div className="flex items-start gap-6 mb-6">
+                <div className={`relative flex-shrink-0 category-icon w-20 h-20 bg-gradient-to-br ${category.color} rounded-2xl flex items-center justify-center text-white shadow-lg transform transition-all duration-300 group-hover:scale-112 group-hover:-rotate-2`}>
+                  <i data-lucide={category.icon} className="w-10 h-10"></i>
+                  <div className="absolute inset-0 bg-white/20 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                </div>
+
+                <div className="flex-1 pt-2">
+                  <h3 className="text-2xl font-bold text-gray-900 dark:text-dark-text mb-3 group-hover:text-gray-700 dark:group-hover:text-gray-200 transition-colors">{category.title}</h3>
+                  <p className="text-gray-600 dark:text-gray-200 leading-relaxed">{category.description}</p>
+                </div>
+              </div>
+
+              <div className="mb-8">
+                <h4 className="text-sm font-semibold text-gray-500 dark:text-gray-300 uppercase tracking-wider mb-4">Common Examples</h4>
+                <div className="grid grid-cols-2 gap-3">
+                  {category.examples.map((example, idx) => (
+                    <div 
+                      key={idx}
+                      className={`bg-gradient-to-r ${category.color} bg-opacity-10 dark:bg-gray-800/80 backdrop-blur-sm border border-gray-200/50 dark:border-gray-700 rounded-xl px-4 py-3 text-center text-sm font-medium text-gray-800 dark:text-gray-200 transform transition-all duration-300 hover:scale-105 hover:shadow-md group-hover:bg-opacity-20`}
+                      style={{ transitionDelay: `${idx * 50}ms` }}
+                    >
+                      {example}
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <a href={category.href}>
+                <button 
+                  className={`learn-more-btn w-full flex items-center justify-center gap-3 bg-gradient-to-r ${category.color}`}
+                  aria-label={`Learn More About ${category.title}`}
+                >
+                  <span>Learn More About {category.title}</span>
+                  <i data-lucide="chevron-right" className={`w-5 h-5 transition-transform duration-300 ${isHovered ? 'translate-x-1' : ''}`}></i>
+                </button>
+              </a>
+            </div>
+          </div>
+        );
+      };
+
+      function App() {
+        const [mounted, setMounted] = useState(false);
+
+        useEffect(() => {
+          setMounted(true);
+          if (window.lucide && typeof window.lucide.createIcons === 'function') {
+            window.lucide.createIcons();
+          }
+        }, []);
+
+        const handleStartQuiz = () => {
+          window.location.href = 'quiz.html';
+        };
+
+        return (
+          <div className="min-h-screen relative overflow-hidden">
+            {/* Floating background shapes */}
+            <div className="fixed inset-0 pointer-events-none overflow-hidden">
+              <FloatingShape delay={0} size="w-32 h-32" position="top-20 left-20" />
+              <FloatingShape delay={2} size="w-24 h-24" position="top-1/2 right-20" />
+              <FloatingShape delay={4} size="w-20 h-20" position="bottom-40 left-1/4" />
+              <FloatingShape delay={1} size="w-28 h-28" position="bottom-20 right-1/3" />
+              <FloatingShape delay={3} size="w-16 h-16" position="top-1/3 left-1/2" />
+            </div>
+
+            {/* Header */}
+            <header className="relative z-20 bg-white/80 dark:bg-gray-800/80 backdrop-blur-md border-b border-gray-200/50 dark:border-gray-700 shadow-sm">
+              <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div className="flex items-center justify-between h-20">
+                  <div className="flex items-center gap-4">
+                    <div className="w-14 h-14 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-2xl flex items-center justify-center shadow-lg">
+                      <i data-lucide="graduation-cap" className="w-8 h-8 text-white"></i>
+                    </div>
+                    <div>
+                      <h1 className="text-2xl font-bold text-gray-900 dark:text-dark-text">Learn Road Safety Signs</h1>
+                      <p className="text-sm text-gray-500 dark:text-gray-300">Interactive Learning Platform</p>
+                    </div>
+                  </div>
+
+                  <nav className="flex items-center">
+                    <a href="index.html" className="main-nav-btn flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-orange-500 to-amber-500 text-white rounded-xl font-semibold hover:from-orange-600 hover:to-amber-600 hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-300" aria-label="Home">
+                      <i data-lucide="home" className="w-5 h-5"></i>
+                      <span>Home</span>
+                    </a>
+                  </nav>
+                </div>
+              </div>
+            </header>
+
+            {/* Main Content */}
+            <main className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+              {/* Hero Section */}
+              <div className={`text-center mb-16 transition-all duration-1000 ${mounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'} animate-fade-in`}>
+                <div className="inline-flex items-center gap-2 bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300 px-4 py-2 rounded-full text-sm font-semibold mb-6">
+                  <i data-lucide="zap" className="w-4 h-4"></i>
+                  Interactive Learning Experience
+                </div>
+                <h2 className="text-5xl md:text-6xl font-bold text-gray-900 dark:text-dark-text mb-6 leading-tight">
+                  Master Road Safety
+                  <span className="block bg-gradient-to-r from-blue-500 to-cyan-500 bg-clip-text text-transparent">Signs & Rules</span>
+                </h2>
+                <p className="prose prose-lg text-gray-600 dark:text-gray-300 max-w-3xl mx-auto leading-relaxed mb-8">
+                  Understanding road signs is essential for safe driving. Learn about the main categories 
+                  of road signs, their purposes, and master the rules of the road through our interactive platform.
+                </p>
+
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-6 max-w-4xl mx-auto mb-12">
+                  <div className="animate-fade-in" style={{ animationDelay: '0ms' }}>
+                    <StatCard icon="target" title="Sign Categories" value="4" color="bg-gradient-to-br from-blue-500 to-cyan-500" />
+                  </div>
+                  <div className="animate-fade-in" style={{ animationDelay: '120ms' }}>
+                    <StatCard icon="users" title="Active Learners" value="1.2K+" color="bg-gradient-to-br from-emerald-500 to-teal-500" />
+                  </div>
+                  <div className="animate-fade-in" style={{ animationDelay: '240ms' }}>
+                    <StatCard icon="award" title="Success Rate" value="95%" color="bg-gradient-to-br from-amber-500 to-orange-500" />
+                  </div>
+                  <div className="animate-fade-in" style={{ animationDelay: '360ms' }}>
+                    <StatCard icon="map" title="Practice Tests" value="50+" color="bg-gradient-to-br from-purple-500 to-indigo-500" />
+                  </div>
+                </div>
+              </div>
+
+              {/* Categories Grid */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-16">
+                {categories.map((category, index) => (
+                  <CategoryCard key={category.id} category={category} index={index} />
+                ))}
+              </div>
+
+              {/* CTA Section */}
+              <div className="text-center bg-gradient-to-r from-blue-500 to-cyan-500 rounded-3xl p-12 text-white additional-info animate-fade-in">
+                <div className="max-w-2xl mx-auto">
+                  <h3 className="text-3xl font-bold mb-4">Ready to Test Your Knowledge?</h3>
+                  <p className="text-blue-100 text-lg mb-8">Take our comprehensive road safety quiz and earn your certificate of completion.</p>
+                  <a href="quiz.html">
+                    <button 
+                      className="bg-white text-blue-600 px-8 py-4 rounded-xl font-bold text-lg shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 flex items-center gap-3 mx-auto"
+                      aria-label="Start Interactive Quiz"
+                    >
+                      <i data-lucide="trophy" className="w-6 h-6"></i>
+                      Start Interactive Quiz
+                      <i data-lucide="chevron-right" className="w-5 h-5"></i>
+                    </button>
+                  </a>
+                </div>
+              </div>
+            </main>
+          </div>
+        );
+      }
+
+      const root = ReactDOM.createRoot(document.getElementById('root'));
+      root.render(<App />);
+
+      // Global icon init as a fallback
+      if (window.lucide && typeof window.lucide.createIcons === 'function') {
+        window.lucide.createIcons();
+      }
+    </script>
+  </body>
+</html>
